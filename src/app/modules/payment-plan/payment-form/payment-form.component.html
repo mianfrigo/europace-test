@@ -1,1 +1,102 @@
-<p>payment-form works!</p>
+<form
+  [formGroup]="form"
+  class="grid grid-cols-2 items-center md:grid-cols-4 gap-5"
+>
+  <div class="">
+    <label class="text-sm text-slate-400" for="loanAmount">Loan Amount</label>
+    <p-datepicker
+      formControlName="startDate"
+      [iconDisplay]="'input'"
+      styleClass="w-full"
+      [showIcon]="true"
+      inputId="icondisplay"
+      dateFormat="dd.mm.yy"
+    />
+    @if (form.controls['startDate'].invalid &&
+    form.controls['startDate'].touched) {
+    <small class="text-red-600 block">Date is required</small>
+    }
+  </div>
+  <div>
+    <label class="text-sm text-slate-400" for="loanAmount">Loan Amount</label>
+    <p-inputgroup>
+      <p-inputgroup-addon>€</p-inputgroup-addon>
+      <p-inputnumber
+        inputId="loanAmount"
+        mode="decimal"
+        locale="de-DE"
+        [minFractionDigits]="2"
+        formControlName="loanAmount"
+      />
+    </p-inputgroup>
+    @if (form.controls['loanAmount'].invalid &&
+    form.controls['loanAmount'].touched) {
+    <small class="text-red-600">Loan amount is required</small>
+    }
+  </div>
+
+  <div>
+    <label class="text-sm text-slate-400" for="interestRate"
+      >Interest Rate</label
+    >
+    <p-inputgroup>
+      <p-inputgroup-addon>%</p-inputgroup-addon>
+      <p-inputnumber
+        inputId="interestRate"
+        mode="decimal"
+        [minFractionDigits]="1"
+        [maxFractionDigits]="2"
+        formControlName="interestRate"
+      />
+    </p-inputgroup>
+    @if (form.controls['interestRate'].invalid &&
+    form.controls['interestRate'].touched) {
+    <small class="text-red-600">Interest rate is required</small>
+    }
+  </div>
+
+  <div>
+    <label class="text-sm text-slate-400" for="initialRepayment"
+      >Initial Repayment</label
+    >
+    <p-inputgroup>
+      <p-inputgroup-addon>%</p-inputgroup-addon>
+      <p-inputnumber
+        inputId="initialRepayment"
+        mode="decimal"
+        [minFractionDigits]="1"
+        [maxFractionDigits]="2"
+        formControlName="initialRepayment"
+      />
+    </p-inputgroup>
+    @if (form.controls['initialRepayment'].invalid &&
+    form.controls['initialRepayment'].touched) {
+    <small class="text-red-600">Initial repayment is required</small>
+    }
+  </div>
+
+  <div>
+    <label class="text-sm text-slate-400" for="fixationPeriod"
+      >Fixation Period (Years)</label
+    >
+    <p-inputgroup>
+      <p-inputgroup-addon>Years</p-inputgroup-addon>
+      <p-inputnumber
+        inputId="fixationPeriod"
+        formControlName="fixationPeriod"
+      />
+    </p-inputgroup>
+    @if (form.controls['fixationPeriod'].invalid &&
+    form.controls['fixationPeriod'].touched) {
+    <small class="ng-invalid ng-dirty">Fixation period is required</small>
+    }
+  </div>
+</form>
+<button
+  pButton
+  class="mt-5"
+  type="button"
+  label="Generate Plan"
+  (click)="generatePlan()"
+  [disabled]="!form.valid"
+></button>

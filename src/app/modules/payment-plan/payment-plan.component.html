@@ -1,1 +1,43 @@
-<p>payment-plan works!</p>
+<h1 class="text-3xl font-semibold">
+  Calculate your <span class="text-cyan-600">payment</span> plan...
+</h1>
+
+<section class="mt-10">
+  <app-payment-form
+    (onSubmit)="calculatePaymentPlan($event)"
+  ></app-payment-form>
+</section>
+
+<section class="mt-16">
+  <p-table
+    [value]="$any(repaymentPlan$ | async)"
+    [paginator]="true"
+    [rowsPerPageOptions]="[5, 10, 15]"
+    [rows]="10"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Date</th>
+        <th>Residual Debt</th>
+        <th>Interest Charges</th>
+        <th>Repayment(+)/Payment(-)</th>
+        <th>Rate</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-entry let-rowIndex="rowIndex">
+      <tr>
+        <td>
+          {{
+            (repaymentPlan$ | async)?.length === rowIndex + 1
+              ? "End of the fixed interest period"
+              : (entry.date | date : "dd.MM.YYYY")
+          }}
+        </td>
+        <td>{{ entry.residualDebt | currency : "EUR" }}</td>
+        <td>{{ entry.interestCharges | currency : "EUR" }}</td>
+        <td>{{ entry.repayment | currency : "EUR" }}</td>
+        <td>{{ entry.rate | currency : "EUR" }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, first, map, Observable, of, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  first,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { PaymentInputs, RepaymentPlanEntry } from '../../models/payment';
 
 @Injectable({
@@ -24,7 +32,14 @@ export class PaymentPlanService {
         if (paymentPlan) {
           return of(paymentPlan);
         }
-        return of(this.generateRepaymentPlan(data));
+        return of(this.generateRepaymentPlan(data)).pipe(
+          tap((paymentPlan) => {
+            const id = this.generateRepaymentId(data);
+            const stored = structuredClone(this.store.getValue());
+            stored[id] = paymentPlan;
+            this.store.next(stored);
+          })
+        );
       })
     );
   }
@@ -94,11 +109,6 @@ export class PaymentPlanService {
       repayment: totalRepayment,
       rate: totalRepayment,
     });
-
-    const id = this.generateRepaymentId(data);
-    const stored = this.store.value;
-    stored[id] = repaymentPlan;
-    this.store.next(stored);
 
     return repaymentPlan;
   }
