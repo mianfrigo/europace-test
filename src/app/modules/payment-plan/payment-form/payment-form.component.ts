@@ -2,10 +2,8 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-payment-form',
-  imports: [],
+  standalone: false,
   templateUrl: './payment-form.component.html',
-  styleUrl: './payment-form.component.scss'
+  styleUrl: './payment-form.component.scss',
 })
-export class PaymentFormComponent {
-
-}
+export class PaymentFormComponent {}
