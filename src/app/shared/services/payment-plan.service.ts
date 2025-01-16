@@ -1,43 +1,54 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import {
   BehaviorSubject,
   first,
-  map,
   Observable,
   of,
+  Subject,
   switchMap,
   tap,
 } from 'rxjs';
 import { PaymentInputs, RepaymentPlanEntry } from '../../models/payment';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PaymentPlanService {
-  store: BehaviorSubject<{ [key: string]: RepaymentPlanEntry[] }> =
-    new BehaviorSubject({});
-  store$: Observable<{ [key: string]: RepaymentPlanEntry[] }> =
-    this.store.asObservable();
+  readonly paymentForm = signal<PaymentInputs | null>(null);
+
+  readonly repaymentPlanResource = rxResource({
+    request: () => this.paymentForm(),
+    loader: ({ request: data }) => {
+      return data
+        ? this.getRepaymentPlan(data)
+        : of([] as RepaymentPlanEntry[]);
+    },
+  });
+  readonly repaymentPlan = computed(
+    () => this.repaymentPlanResource.value() ?? []
+  );
+
+  cache: BehaviorSubject<{ [key: string]: RepaymentPlanEntry[] }> =
+    new BehaviorSubject<{
+      [key: string]: RepaymentPlanEntry[];
+    }>({});
+  cache$: Observable<{ [key: string]: RepaymentPlanEntry[] }> =
+    this.cache.asObservable();
 
   constructor() {}
 
   getRepaymentPlan(data: PaymentInputs): Observable<RepaymentPlanEntry[]> {
-    const id = this.generateRepaymentId(data);
-    return this.store$.pipe(
+    return this.cache$.pipe(
       first(),
-      map((store) => {
-        return store[id];
-      }),
-      switchMap((paymentPlan) => {
-        if (paymentPlan) {
-          return of(paymentPlan);
+      switchMap((payments) => {
+        const id = this.generateRepaymentId(data);
+        if (payments[id]) {
+          return of(payments[id]);
         }
         return of(this.generateRepaymentPlan(data)).pipe(
-          tap((paymentPlan) => {
-            const id = this.generateRepaymentId(data);
-            const stored = structuredClone(this.store.getValue());
-            stored[id] = paymentPlan;
-            this.store.next(stored);
+          tap((data) => {
+            this.cache.next({ ...payments, [id]: data });
           })
         );
       })
@@ -45,17 +56,17 @@ export class PaymentPlanService {
   }
 
   private generateRepaymentId(data: PaymentInputs): string {
-    return Object.values(data).reduce((acc, curr) => {
+    return Object.values(data).reduce((acc, curr: number | Date) => {
       if (typeof curr === 'object') {
-        return acc === ''
-          ? `${curr.toLocaleDateString()}`
-          : `${acc}-${curr.toLocaleDateString()}`;
+        return acc;
       }
-      return acc === '' ? `${curr}` : `${acc}-${curr}`;
+      return acc === ''
+        ? `${curr}`
+        : `${acc}-${curr.toString().replace('.', '-')}`;
     }, '');
   }
 
-  generateRepaymentPlan(data: PaymentInputs): RepaymentPlanEntry[] {
+  private generateRepaymentPlan(data: PaymentInputs): RepaymentPlanEntry[] {
     const {
       loanAmount,
       initialRepayment,

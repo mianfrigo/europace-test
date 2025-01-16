@@ -1,4 +1,9 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import { PaymentInputs } from '../../../models/payment';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
@@ -14,6 +19,7 @@ interface RepaymentForm {
   standalone: false,
   templateUrl: './payment-form.component.html',
   styleUrl: './payment-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentFormComponent {
   @Output() onSubmit: EventEmitter<PaymentInputs> = new EventEmitter();

@@ -7,10 +7,10 @@
     (onSubmit)="calculatePaymentPlan($event)"
   ></app-payment-form>
 </section>
-
 <section class="mt-16">
+  @if (repaymentPlan().length) {
   <p-table
-    [value]="$any(repaymentPlan$ | async)"
+    [value]="repaymentPlan()"
     [paginator]="true"
     [rowsPerPageOptions]="[5, 10, 15]"
     [rows]="10"
@@ -28,7 +28,7 @@
       <tr>
         <td>
           {{
-            (repaymentPlan$ | async)?.length === rowIndex + 1
+            repaymentPlan().length === rowIndex + 1
               ? "End of the fixed interest period"
               : (entry.date | date : "dd.MM.YYYY")
           }}
@@ -40,4 +40,14 @@
       </tr>
     </ng-template>
   </p-table>
+  } @else {
+  <div
+    class="flex flex-col items-center justify-center border-t-[1px] border-slate-300 border-solid pt-5"
+  >
+    <h3 class="text-2xl text-slate-400 capitalize">No date available</h3>
+    <p class="text-slate-300 mt-1">
+      Press the "Generate Plan" button to generate data...
+    </p>
+  </div>
+  }
 </section>
